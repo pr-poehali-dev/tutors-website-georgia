@@ -1,0 +1,19 @@
+{
+  "tests": [
+    {
+      "name": "Get all tutors",
+      "method": "GET",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get tutors by subject",
+      "method": "GET",
+      "queryParams": {
+        "subject": "Английский язык"
+      },
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    }
+  ]
+}

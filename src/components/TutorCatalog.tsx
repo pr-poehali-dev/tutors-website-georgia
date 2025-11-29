@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TutorCard from './TutorCard';
 import TutorProfile from './TutorProfile';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+
+const TUTORS_API_URL = 'https://functions.poehali.dev/251dd004-acda-41d9-8875-290cfcafd7fa';
 
 const mockTutors = [
   {
@@ -122,12 +124,49 @@ const mockTutors = [
 ];
 
 const TutorCatalog = () => {
-  const [selectedTutor, setSelectedTutor] = useState<typeof mockTutors[0] | null>(null);
+  const [selectedTutor, setSelectedTutor] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
+  const [tutors, setTutors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredTutors = mockTutors.filter((tutor) => {
+  useEffect(() => {
+    fetchTutors();
+  }, []);
+
+  const fetchTutors = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(TUTORS_API_URL);
+      const data = await response.json();
+      
+      const formattedTutors = data.map((tutor: any) => ({
+        id: tutor.id,
+        name: `${tutor.first_name} ${tutor.last_name}`,
+        subject: tutor.subject,
+        experience: tutor.experience,
+        rating: parseFloat(tutor.rating),
+        reviews: tutor.reviews_count,
+        price: parseFloat(tutor.price),
+        image: tutor.photo_url,
+        verified: tutor.verified,
+        languages: tutor.languages || [],
+        description: tutor.description,
+        education: tutor.education || [],
+        certificates: tutor.certificates || [],
+      }));
+      
+      setTutors(formattedTutors);
+    } catch (error) {
+      console.error('Failed to fetch tutors:', error);
+      setTutors(mockTutors);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredTutors = tutors.filter((tutor) => {
     const matchesSearch = tutor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           tutor.subject.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSubject = selectedSubject === 'all' || tutor.subject === selectedSubject;
@@ -203,20 +242,29 @@ const TutorCatalog = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTutors.map((tutor) => (
-            <div key={tutor.id} className="animate-fade-in">
-              <TutorCard {...tutor} onClick={() => setSelectedTutor(tutor)} />
-            </div>
-          ))}
-        </div>
-
-        {filteredTutors.length === 0 && (
+{loading ? (
           <div className="text-center py-12">
-            <Icon name="SearchX" size={64} className="mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Репетиторы не найдены</h3>
-            <p className="text-muted-foreground">Попробуйте изменить фильтры поиска</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Загрузка репетиторов...</p>
           </div>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredTutors.map((tutor) => (
+                <div key={tutor.id} className="animate-fade-in">
+                  <TutorCard {...tutor} onClick={() => setSelectedTutor(tutor)} />
+                </div>
+              ))}
+            </div>
+
+            {filteredTutors.length === 0 && (
+              <div className="text-center py-12">
+                <Icon name="SearchX" size={64} className="mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Репетиторы не найдены</h3>
+                <p className="text-muted-foreground">Попробуйте изменить фильтры поиска</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
