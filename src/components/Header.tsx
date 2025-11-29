@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
             <Icon name="GraduationCap" className="text-primary" size={32} />
             <span className="text-2xl font-bold text-primary">Репетиторы.ge</span>
           </div>
@@ -33,8 +35,8 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="outline">Войти</Button>
-            <Button>Стать репетитором</Button>
+            <Button variant="outline" onClick={() => navigate('/login')}>Войти</Button>
+            <Button onClick={() => navigate('/register')}>Стать репетитором</Button>
           </div>
 
           <button
@@ -63,8 +65,8 @@ const Header = () => {
               Контакты
             </a>
             <div className="flex flex-col gap-2 mt-2">
-              <Button variant="outline" className="w-full">Войти</Button>
-              <Button className="w-full">Стать репетитором</Button>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/login')}>Войти</Button>
+              <Button className="w-full" onClick={() => navigate('/register')}>Стать репетитором</Button>
             </div>
           </nav>
         )}
